@@ -48,6 +48,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.UUID;
 
+import static com.project.study.security.jwt.JwtService.TokenType.REFRESH_TOKEN;
+
 
 @Slf4j
 @RequiredArgsConstructor
@@ -86,7 +88,7 @@ public class SecurityConfig {
                 )
                 .logout(logout -> logout
                         .addLogoutHandler(customLogoutHandler())
-                        .deleteCookies("refreshToken")
+                        .deleteCookies(REFRESH_TOKEN.name())
                 )
                 .exceptionHandling((exceptionHandling) -> exceptionHandling
                         .authenticationEntryPoint((request, response, exception) -> response
@@ -227,7 +229,7 @@ public class SecurityConfig {
             CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
             issueTokens(response, customUserDetails.getMember());
 
-            response.sendRedirect("http://localhost:5173");
+            response.sendRedirect("http://localhost:5173"); //todo: 클라이언트 주소 yml에 명시해서 가져오도록 수정
         }
     }
 
@@ -268,7 +270,7 @@ public class SecurityConfig {
 
             //accessToken black & refreshToken delete
             String refreshToken = Arrays.stream(request.getCookies())
-                    .filter(cookie -> cookie.getName().equals("refreshToken"))
+                    .filter(cookie -> cookie.getName().equals(REFRESH_TOKEN))
                     .findFirst().orElse(null)
                     .getValue();
             jwtService.removeToken(refreshToken);
@@ -297,7 +299,7 @@ public class SecurityConfig {
         String accessToken = jwtService.issueAccessToken(member);
         String refreshToken = jwtService.issueRefreshToken(member.getId());
 
-        Cookie cookie = new Cookie("refreshToken", refreshToken);
+        Cookie cookie = new Cookie(REFRESH_TOKEN.name(), refreshToken);
         cookie.setPath("/");
         cookie.setMaxAge((int) jwtService.getREFRESH_TOKEN_EXPIRED_TIME_MS());
         cookie.setHttpOnly(true);
