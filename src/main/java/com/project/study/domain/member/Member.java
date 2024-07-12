@@ -2,7 +2,10 @@ package com.project.study.domain.member;
 
 import com.project.study.domain.AuditingField;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 

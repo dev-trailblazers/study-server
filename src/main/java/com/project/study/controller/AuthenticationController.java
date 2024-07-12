@@ -4,7 +4,6 @@ import com.project.study.domain.email.EmailAuthentication;
 import com.project.study.domain.email.EmailAuthenticationDto;
 import com.project.study.domain.member.dto.MemberJoinDto;
 import com.project.study.security.jwt.JwtService;
-import com.project.study.security.model.CustomUserDetails;
 import com.project.study.service.EmailService;
 import com.project.study.service.MemberService;
 import com.project.study.validation.MemberEmail;
@@ -14,8 +13,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;

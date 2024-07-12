@@ -1,6 +1,5 @@
 package com.project.study.service;
 
-import com.project.study.domain.email.EmailAuthentication;
 import com.project.study.domain.member.Member;
 import com.project.study.domain.member.dto.MemberJoinDto;
 import com.project.study.repository.MemberRepository;
