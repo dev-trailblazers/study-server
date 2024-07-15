@@ -1,21 +1,4 @@
 spring:
-  datasource:
-    url: ${MYSQL_URL}
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: ${MYSQL_USER}
-    password: ${MYSQL_PASSWORD}
-  jpa:
-    hibernate:
-      ddl-auto: none
-      dialect: org.hibernate.dialect.MySQL8Dialect
-      naming:
-        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
-      show-sql: true
-    open-in-view: false
-  data:
-    redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
   security:
     oauth2:
       client:
@@ -32,6 +15,11 @@ spring:
             token-uri: https://kauth.kakao.com/oauth/token              # 토큰
             user-info-uri: https://kapi.kakao.com/v2/user/me            # 유저 정보
             user-name-attribute: id                                     # 응답 중 유저를 식별할 수 있는 식별자 정보
+    jwt:
+      secret: ${JWT_SECRET}
+      expired_time:
+        access_token: ${ACCESS_TOKEN_EXPIRED_TIME_MS}
+        refresh_token: ${REFRESH_TOKEN_EXPIRED_TIME_MS}
   mail:
     host: smtp.gmail.com
     port: 587
@@ -44,12 +32,8 @@ spring:
           starttls:
             enable: true
           auth: false
-jwt:
-  secret: ${JWT_SECRET}
-  expired_time:
-    access_token: ${ACCESS_TOKEN_EXPIRED_TIME_MS}
-    refresh_token: ${REFRESH_TOKEN_EXPIRED_TIME_MS}
+  profiles:
+    active: prod
 
-logging:
-  level:
-    com.project.com.project.study: info
+
+

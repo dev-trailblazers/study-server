@@ -18,7 +18,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Component
 public class JwtProvider {
-    @Value("${jwt.secret}")
+    @Value("${spring.security.jwt.secret}")
     private String secret;
     private SecretKey secretKey;
 

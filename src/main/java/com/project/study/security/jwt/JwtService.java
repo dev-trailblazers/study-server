@@ -26,11 +26,11 @@ public class JwtService {
     private final RedisTemplate redisTemplate;
     private final MemberRepository memberRepository;
 
-    @Value("${jwt.expired_time.access_token}")
+    @Value("${spring.security.jwt.expired_time.access_token}")
     private long ACCESS_TOKEN_EXPIRED_TIME_MS;
 
     @Getter
-    @Value("${jwt.expired_time.refresh_token}")
+    @Value("${spring.security.jwt.expired_time.refresh_token}")
     private long REFRESH_TOKEN_EXPIRED_TIME_MS;
 
     private static final String BLACK_LIST_PREFIX = "restricted_";
