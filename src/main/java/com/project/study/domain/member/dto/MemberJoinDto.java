@@ -26,7 +26,7 @@ public record MemberJoinDto(
         @Pattern(regexp = "^[가-힣]{2,6}$")
         String name,
         @NotNull
-        @Past
+        @Past(message = "생년월일은 오늘 이전 날짜여야 합니다.")
         LocalDate birth,
         @NotNull
         Member.Gender gender,

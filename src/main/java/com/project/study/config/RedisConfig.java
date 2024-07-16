@@ -15,9 +15,6 @@ public class RedisConfig {
     private int port;
 
 
-    /**
-     * Redis Connection 생성을 위한 팩토리 빈
-     * */
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
         return new LettuceConnectionFactory(host, port);

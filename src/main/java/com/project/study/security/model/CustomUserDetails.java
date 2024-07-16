@@ -37,7 +37,7 @@ public class CustomUserDetails implements OAuth2User, UserDetails {
 
     /**
      * OAuth2로부터 받아온 유저 정보 ex) profile
-     * customOAuth2UserService에서 OAuth2 객체를 따로 만들어서 처리하기 때문에 사용하지 않음
+     * customOAuth2UserService에서 OAuth2 DTO 객체를 따로 만들어서 처리하기 때문에 사용하지 않음
      * */
     @Override
     public Map<String, Object> getAttributes() {

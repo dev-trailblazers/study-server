@@ -17,6 +17,9 @@ spring:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
 
+client:
+  url: ${CLIENT_API_URL}
+
 logging:
   level:
     com.project.com.project.study: info

@@ -4,9 +4,7 @@ import com.project.study.domain.member.JoinPlatform;
 import com.project.study.domain.member.Member;
 import com.project.study.repository.MemberRepository;
 import com.project.study.security.model.CustomUserDetails;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,10 +39,10 @@ public class JwtService {
      * 엑세스 토큰을 검증하고 Redis에서 블랙리스트 체크를 진행한다.
      */
     public boolean validateAccessToken(String token) {
-        if(!jwtProvider.validate(token)){
+        if (!jwtProvider.validate(token)) {
             return false;
         }
-        if(redisTemplate.hasKey(BLACK_LIST_PREFIX + token)){
+        if (redisTemplate.hasKey(BLACK_LIST_PREFIX + token)) {
             log.warn("사용이 제한된 토큰입니다.");
             return false;
         }
@@ -60,14 +58,14 @@ public class JwtService {
         redisTemplate.opsForValue().set(key, token.getTokenValue(), expiredTimeMs, TimeUnit.MILLISECONDS);
     }
 
-    /** OAuth2 엑세스 토큰 조회 */
-    public String getOauth2AccessToken(String username){
+    /**
+     * OAuth2 엑세스 토큰 조회
+     */
+    public String getOauth2AccessToken(String username) {
         return (String) redisTemplate.opsForValue().get(OAUTH2_PREFIX + username);
     }
 
-    /**
-     * 액세스 토큰 발행
-     */
+
     public String issueAccessToken(Member member) {
         Map<String, Object> claims = Map.of(
                 "id", member.getId(),
@@ -80,7 +78,7 @@ public class JwtService {
 
     /**
      * 리프레시 토큰 발행
-     *
+     * <p>
      * 화이트 리스트로 토큰을 관리하기 위해 Redis에 토큰을 저장한다.
      * 이때 각 기기마다 다른 리프레시 토큰을 발급 받을 수 있도록 키를 토큰으로 저장한다.
      */
@@ -93,13 +91,13 @@ public class JwtService {
 
     /**
      * 토큰 재발급
-     *
+     * <p>
      * Redis에서 TTL을 사용하기 때문에 만료 체크가 불필요하고, 일치해야하기 때문에 유효한 토큰일 수 밖에 없다.
      * 따라서 별도의 검증을 하지않는다.
-     *
+     * <p>
      * 기존 토큰을 삭제하고 새로운 리프레시 토큰과 액세스 토큰을 발급한다.
      */
-    public Map<String, String> reissuanceToken(String refreshToken) {
+    public Map<TokenType, String> reissuanceToken(String refreshToken) {
         if (!redisTemplate.hasKey(refreshToken)) {
             throw new IllegalArgumentException("사용할 수 없는 리프레시 토큰입니다.");
         }
@@ -115,30 +113,27 @@ public class JwtService {
         String accessToken = issueAccessToken(member);
 
         return Map.of(
-                "refreshToken", issuedRefreshToken,
-                "accessToken", accessToken
+                TokenType.REFRESH_TOKEN, issuedRefreshToken,
+                TokenType.ACCESS_TOKEN, accessToken
         );
     }
 
-    /** 토큰 삭제 */
     public void removeToken(String key) {
         redisTemplate.delete(key);
     }
 
 
-    /** 토큰을 사용하지 못하도록 블랙리스트에 추가
+    /**
+     * 토큰을 사용하지 못하도록 블랙리스트에 추가
      * 남은 만료 기간 동안 저장한다.
-     * */
+     */
     public void restrictToken(String token) {
         JwtMemberInfo member = jwtProvider.getClaimInToken(token, "member", JwtMemberInfo.class);
         long remainingTime = jwtProvider.getRemainingTime(token);
-        redisTemplate.opsForValue().set(BLACK_LIST_PREFIX + token, member.id, remainingTime, TimeUnit.MILLISECONDS);
+        redisTemplate.opsForValue().set(BLACK_LIST_PREFIX + token, member.getId(), remainingTime, TimeUnit.MILLISECONDS);
     }
 
 
-    /**
-     * 토큰에서 회원 인증 정보를 가져온다.
-     */
     public CustomUserDetails getUserDetailsInToken(String token) {
         Member member = jwtProvider.getClaimInToken(token, "member", JwtMemberInfo.class).to();
         return new CustomUserDetails(member);
@@ -148,42 +143,4 @@ public class JwtService {
         return jwtProvider.getClaimInToken(token, "joinPlatform", JoinPlatform.class);
     }
 
-
-    /**
-     * JWT에 저장하기 위한 멤버 객체
-     */
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    private static class JwtMemberInfo {
-        private Long id;
-        private String name;
-        private String profile_image;
-        private Member.RoleType roleType;
-
-        protected Member to() {
-            return Member.builder()
-                    .id(this.id)
-                    .name(this.name)
-                    .profile_image(this.profile_image)
-                    .role(this.roleType)
-                    .build();
-        }
-
-        protected static JwtMemberInfo from(Member member) {
-            return new JwtMemberInfo(
-                    member.getId(),
-                    member.getName(),
-                    member.getProfile_image(),
-                    member.getRole()
-            );
-        }
-    }
-
-    /**
-     * 토큰 타입을 구분하기 위한 ENUM
-     */
-    public enum TokenType {
-        ACCESS_TOKEN, REFRESH_TOKEN, OAuth2_TOKEN
-    }
 }

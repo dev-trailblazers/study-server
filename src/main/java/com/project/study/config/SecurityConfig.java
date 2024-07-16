@@ -16,6 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -48,8 +49,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.UUID;
 
-import static com.project.study.security.jwt.JwtService.TokenType.REFRESH_TOKEN;
-
+import static com.project.study.security.jwt.TokenType.REFRESH_TOKEN;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -60,6 +60,9 @@ public class SecurityConfig {
     private final JwtService jwtService;
     private final MemberService memberService;
     private final OAuth2Service oAuth2Service;
+
+    @Value("${client.url}")
+    private String CLIENT_URL;
 
 
     @Bean
@@ -75,7 +78,8 @@ public class SecurityConfig {
                         .requestMatchers("/", "/auth/**", "/error").permitAll()
                         .anyRequest().authenticated()
                 )
-                .oauth2Login(oauth2 -> oauth2   // login request url = {baseUrl}/oauth2/authorization/{provider}
+                //OAuth2 Login Request URL Pattern = {baseUrl}/oauth2/authorization/{provider}
+                .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(user -> user.userService(
                                 customOAuth2UserService(passwordEncoder))
                         ).successHandler(customOAuth2LoginSuccessHandler())
@@ -104,7 +108,6 @@ public class SecurityConfig {
         return configuration.getAuthenticationManager();
     }
 
-
     @Bean
     public CustomOAuth2LoginSuccessHandler customOAuth2LoginSuccessHandler() {
         return new CustomOAuth2LoginSuccessHandler();
@@ -121,6 +124,10 @@ public class SecurityConfig {
     }
 
 
+    /**
+     * UsernamePasswordAuthenticationFilter의 AuthenticationManager 호출 시
+     * AuthenticationProvider에서 UserDetailsService를 호출한 다음 비밀번호를 확인한다.
+     * */
     @Bean
     public UserDetailsService customUserDetailsService() {
         return username -> memberService.findAvailableMemberByUsername(username)
@@ -128,6 +135,9 @@ public class SecurityConfig {
                 .orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 유저입니다."));
     }
 
+
+
+    /** userInfoEndPoint에서 OAuth2 유저 정보를 가져오는 로직을 담당한다. */
     @Bean
     public OAuth2UserService<OAuth2UserRequest, OAuth2User> customOAuth2UserService(PasswordEncoder passwordEncoder) {
         final DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
@@ -229,7 +239,7 @@ public class SecurityConfig {
             CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
             issueTokens(response, customUserDetails.getMember());
 
-            response.sendRedirect("http://localhost:5173"); //todo: 클라이언트 주소 yml에 명시해서 가져오도록 수정
+            response.sendRedirect(CLIENT_URL);
         }
     }
 
@@ -292,9 +302,6 @@ public class SecurityConfig {
     }
 
 
-    /**
-     * 토큰 발행
-     */
     private void issueTokens(HttpServletResponse response, Member member) {
         String accessToken = jwtService.issueAccessToken(member);
         String refreshToken = jwtService.issueRefreshToken(member.getId());

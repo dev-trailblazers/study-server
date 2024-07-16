@@ -40,7 +40,7 @@ public class JwtProvider {
             Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
             return true;
         } catch (ExpiredJwtException e) {
-            log.warn("토큰이 만료되었습니다.");
+            log.info("토큰이 만료되었습니다.");
         } catch (JwtException e) {
             log.warn("토큰이 유효하지 않습니다.");
         }
