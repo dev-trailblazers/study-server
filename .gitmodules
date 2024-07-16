@@ -1,4 +1,4 @@
 [submodule "secrets"]
 	path = secrets
 	url = https://github.com/dev-trailblazers/secrets.git
-	branch = develop
+	branch = main
