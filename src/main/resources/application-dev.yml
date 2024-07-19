@@ -20,8 +20,3 @@ spring:
 client:
   url: http://localhost:5173
 
-logging:
-  level:
-    org.springframework.security: trace
-    com.project.com.project.study: trace
-    org.hibernate.type.descriptor.sql.BasicBinder: debug

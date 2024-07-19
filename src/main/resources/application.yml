@@ -33,7 +33,7 @@ spring:
             enable: true
           auth: false
   profiles:
-    active: prod
+    active: dev   #jar 파일 실행 시 --spring.profiles.active=prod 로 실행하면 오버라이드 할 수 있다.
 
 
 
