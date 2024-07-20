@@ -6,7 +6,7 @@ spring:
     password: ${MYSQL_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
       dialect: org.hibernate.dialect.MySQL8Dialect
       naming:
         physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
