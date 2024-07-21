@@ -24,7 +24,7 @@
     <appender name="DAILY-ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>${ROOT_PATH}/daily/${FILE_NAME_PATTERN}</fileNamePattern>
-            <totalSizeCap>500MB</totalSizeCap>
+            <maxFileSize>100MB</maxFileSize>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>
