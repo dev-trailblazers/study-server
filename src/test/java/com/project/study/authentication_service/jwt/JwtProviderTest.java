@@ -1,7 +1,8 @@
-package com.project.study.security.jwt;
+package com.project.study.authentication_service.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.study.domain.member.Member;
+import com.project.study.authentication_service.domain.jwt.JwtProvider;
+import com.project.study.member_service.domain.member.Member;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

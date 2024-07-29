@@ -1,7 +1,7 @@
-package com.project.study.repository;
+package com.project.study.member_service.repository;
 
-import com.project.study.domain.member.JoinPlatform;
-import com.project.study.domain.member.Member;
+import com.project.study.member_service.domain.member.JoinPlatform;
+import com.project.study.member_service.domain.member.Member;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -75,6 +75,7 @@ class JpaRepositoryTest {
                 .profile_image("test_img.com")
                 .role(Member.RoleType.ROLE_USER)
                 .joinPlatform(JoinPlatform.BASIC)
+                .useYn(true)
                 .build();
     }
 

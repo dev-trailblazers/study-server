@@ -31,7 +31,7 @@ public class MemberController {
     @PostMapping("/join")
     public void joinMember(@RequestBody @Valid JoinDto dto){
         if(memberService.checkDuplicateUsername(dto.getUsername())){
-            throw new IllegalArgumentException("아이디는 중복될 수 없습니다.");     //todo: controller advice로 예외처리
+            throw new IllegalArgumentException("아이디는 중복될 수 없습니다.");
         }
         Optional<EmailVerify> auth = emailService.findByEmail(dto.getEmail());
         if(auth.isEmpty() || !auth.get().isStatus()){
