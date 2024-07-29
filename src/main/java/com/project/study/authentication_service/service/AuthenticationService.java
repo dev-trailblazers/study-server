@@ -41,15 +41,12 @@ public class AuthenticationService {
     /**
      * 엑세스 토큰을 검증하고 Redis에서 블랙리스트 체크를 진행한다.
      */
-    public boolean validateAccessToken(String token) {
-        if (!jwtProvider.validate(token)) {
-            return false;
-        }
+    public void validateAccessToken(String token) {
+        jwtProvider.validate(token);
+
         if (redisTemplate.hasKey(BLACK_LIST_PREFIX + token)) {
-            log.warn("사용이 제한된 토큰입니다.");
-            return false;
+            throw new IllegalArgumentException("사용이 제한된 토큰입니다.");
         }
-        return true;
     }
 
     /**
@@ -131,6 +128,8 @@ public class AuthenticationService {
      * 남은 만료 기간 동안 저장한다.
      */
     public void restrictToken(String token) {
+        jwtProvider.validate(token);
+
         MemberInJWT member = jwtProvider.getClaimInToken(token, "member", MemberInJWT.class);
         long remainingTime = jwtProvider.getRemainingTime(token);
         redisTemplate.opsForValue().set(BLACK_LIST_PREFIX + token, member.getId(), remainingTime, TimeUnit.MILLISECONDS);

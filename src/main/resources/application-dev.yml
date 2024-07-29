@@ -20,3 +20,7 @@ spring:
 client:
   url: http://localhost:5173
 
+logging:
+  level:
+    root: DEBUG
+    org.springframework.security: TRACE

@@ -47,6 +47,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.project.study.authentication_service.domain.jwt.TokenType.REFRESH_TOKEN;
@@ -95,6 +96,10 @@ public class SecurityConfig {
                 .logout(logout -> logout
                         .addLogoutHandler(customLogoutHandler())
                         .deleteCookies(REFRESH_TOKEN.name())
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            //로그아웃 후 리다이렉트를 비활성화 하기 위해 200 상태코드를 반환하고 끝내도록 커스텀
+                            response.setStatus(HttpServletResponse.SC_OK);
+                        })
                 )
                 .exceptionHandling((exceptionHandling) -> exceptionHandling
                         .authenticationEntryPoint((request, response, exception) -> response
@@ -129,7 +134,7 @@ public class SecurityConfig {
     /**
      * UsernamePasswordAuthenticationFilter의 AuthenticationManager 호출 시
      * AuthenticationProvider에서 UserDetailsService를 호출한 다음 비밀번호를 확인한다.
-     * */
+     */
     @Bean
     public UserDetailsService customUserDetailsService() {
         return username -> memberService.findAvailableMemberByUsername(username)
@@ -138,8 +143,9 @@ public class SecurityConfig {
     }
 
 
-
-    /** userInfoEndPoint에서 OAuth2 유저 정보를 가져오는 로직을 담당한다. */
+    /**
+     * userInfoEndPoint에서 OAuth2 유저 정보를 가져오는 로직을 담당한다.
+     */
     @Bean
     public OAuth2UserService<OAuth2UserRequest, OAuth2User> customOAuth2UserService(PasswordEncoder passwordEncoder) {
         final DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
@@ -191,12 +197,10 @@ public class SecurityConfig {
                 filterChain.doFilter(request, response);
                 return;
             }
-
             String token = authorization.split(" ")[1];
-            if (!authenticationService.validateAccessToken(token)) {
-                filterChain.doFilter(request, response);
-                return;
-            }
+
+            //토큰 유효성 검증
+            authenticationService.validateAccessToken(token);
 
             //토큰이 유효하면 UserDetails 객체를 만들어서 SecurityContext의 Authentication으로 넣어준다.
             UserDetails userDetails = authenticationService.getUserDetailsInToken(token);
@@ -273,32 +277,36 @@ public class SecurityConfig {
     private class CustomLogoutHandler implements LogoutHandler {
         @Override
         public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-            //공통 로그아웃 로직
             SecurityContextHolder.clearContext();
 
             //로그아웃 필터 이전에 인증 필터에서 토큰 검증을 진행했기 때문에 여기선 생략한다.
             String authorization = request.getHeader("Authorization");
             String accessToken = authorization.split(" ")[1];
 
-            //accessToken black & refreshToken delete
-            String refreshToken = Arrays.stream(request.getCookies())
-                    .filter(cookie -> cookie.getName().equals(REFRESH_TOKEN))
-                    .findFirst().orElse(null)
-                    .getValue();
-            authenticationService.removeToken(refreshToken);
+            /*
+             * accessToken 블랙리스트에 추가
+             * refreshToken이 쿠키에 존재한다면, 화이트리스트에서 삭제
+             * */
             authenticationService.restrictToken(accessToken);
+            Optional.ofNullable(request.getCookies())
+                    .ifPresent((cookies) -> Arrays.stream(cookies)
+                            .filter(cookie -> cookie.getName().equals(REFRESH_TOKEN.name()))
+                            .findFirst()
+                            .ifPresent((cookie) -> authenticationService.removeToken(cookie.getValue()))
+                    );
+            log.debug("토큰 비활성화 완료");
 
-
-            //OAuth2 로그아웃 로직
+            //OAuth2 로그인 사용자가 로그아웃한 경우 해당 플랫폼에도 로그아웃 요청
             JoinPlatform joinPlatform = authenticationService.getJoinPlatformInToken(accessToken);
-            if (joinPlatform == null || joinPlatform == JoinPlatform.BASIC) {
-                return;
-            }
+
+            if (joinPlatform == null || joinPlatform == JoinPlatform.BASIC) return;
+
             Long memberId = authenticationService.getUserDetailsInToken(accessToken).getMember().getId();
             String username = memberService.findById(memberId).getUsername();
 
             String oauth2AccessToken = authenticationService.getOauth2AccessToken(username);
             oAuth2Service.logout(oauth2AccessToken, joinPlatform);
+            log.debug("OAuth2에서 로그아웃 완료");
         }
 
     }

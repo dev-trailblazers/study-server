@@ -35,16 +35,14 @@ public class JwtProvider {
 
 
     /** 토큰 유효성 검증 */
-    public boolean validate(String token) {
+    public void validate(String token) {
         try {
             Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
-            return true;
         } catch (ExpiredJwtException e) {
-            log.info("토큰이 만료되었습니다.");
+            throw new ExpiredJwtException(Jwts.header().build(), Jwts.claims().build(), "토큰이 만료되었습니다.");
         } catch (JwtException e) {
-            log.warn("토큰이 유효하지 않습니다.");
+            throw new JwtException("토큰이 유효하지 않습니다.");
         }
-        return false;
     }
 
 
