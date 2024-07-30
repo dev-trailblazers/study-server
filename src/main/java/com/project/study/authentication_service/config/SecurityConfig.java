@@ -25,6 +25,7 @@ import org.springframework.security.authentication.*;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -48,9 +49,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static com.project.study.authentication_service.domain.jwt.TokenType.REFRESH_TOKEN;
+import static com.project.study.member_service.domain.member.JoinPlatform.KAKAO;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -65,6 +68,10 @@ public class SecurityConfig {
     @Value("${client.url}")
     private String CLIENT_URL;
 
+    private static final Set<String> EXCLUDED_PATHS = Set.of(
+            "/error", "/v3/api-docs/**", "/swagger-ui/**",
+            "/api/v1/auth/**", "/api/v1/member/join/**"
+    );
 
     @Bean
     public SecurityFilterChain config(HttpSecurity http, PasswordEncoder passwordEncoder) throws Exception {
@@ -76,10 +83,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                        .requestMatchers(
-                                "/", "/error", "/v3/api-docs/**", "/swagger-ui/**",
-                                "/api/v1/auth/**", "/api/v1/member/join/**"
-                        ).permitAll()
+                        .requestMatchers(EXCLUDED_PATHS.toArray(new String[0])).permitAll()
                         .anyRequest().authenticated()
                 )
                 //OAuth2 Login Request URL Pattern = {baseUrl}/oauth2/authorization/{provider}
@@ -112,22 +116,22 @@ public class SecurityConfig {
 
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+    AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
 
     @Bean
-    public CustomOAuth2LoginSuccessHandler customOAuth2LoginSuccessHandler() {
+    CustomOAuth2LoginSuccessHandler customOAuth2LoginSuccessHandler() {
         return new CustomOAuth2LoginSuccessHandler();
     }
 
     @Bean
-    public CustomAuthenticationFailureHandler customAuthenticationFailureHandler() {
+    CustomAuthenticationFailureHandler customAuthenticationFailureHandler() {
         return new CustomAuthenticationFailureHandler();
     }
 
     @Bean
-    public CustomLogoutHandler customLogoutHandler() {
+    CustomLogoutHandler customLogoutHandler() {
         return new CustomLogoutHandler();
     }
 
@@ -158,12 +162,10 @@ public class SecurityConfig {
             OAuth2Response oAuth2Response;
 
             //OAuth2 platform이 추가되면 해당 OAuth2Response를 구현한 후 조건문을 추가하면 된다.
-            switch (registrationId) {
-                case "kakao":
-                    oAuth2Response = KakaoOAuth2Response.from(oAuth2User.getAttributes());
-                    break;
-                default:
-                    throw new IllegalArgumentException("지원하지 않는 OAuth2 플랫폼입니다.");
+            if (registrationId.equals(KAKAO.getRegistrationId())) {
+                oAuth2Response = KakaoOAuth2Response.from(oAuth2User.getAttributes());
+            } else {
+                throw new IllegalArgumentException("지원하지 않는 OAuth2 플랫폼입니다.");
             }
 
             Member member = oAuth2Response.toMember();
@@ -186,13 +188,24 @@ public class SecurityConfig {
     }
 
 
-    public class TokenAuthenticationFilter extends OncePerRequestFilter {
+    private class TokenAuthenticationFilter extends OncePerRequestFilter {
         @Override
         protected void doFilterInternal(HttpServletRequest request,
                                         HttpServletResponse response,
                                         FilterChain filterChain) throws ServletException, IOException {
-            String authorization = request.getHeader("Authorization");
+            //인증 대상에서 제외된 URL 인증 스킵
+            String path = request.getRequestURI();
+            boolean isExcluded = EXCLUDED_PATHS.stream()
+                    .anyMatch(excludedPath -> path
+                            .matches(excludedPath.replace("**", ".*"))
+                    );
+            if (isExcluded) {
+                filterChain.doFilter(request, response);
+                return;
+            }
 
+            // 토큰 꺼내기
+            String authorization = request.getHeader("Authorization");
             if (authorization == null || !authorization.startsWith("Bearer ")) {
                 log.warn("잘못된 토큰 헤더 : {}", authorization);
                 filterChain.doFilter(request, response);

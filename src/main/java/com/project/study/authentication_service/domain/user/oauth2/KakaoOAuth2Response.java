@@ -38,7 +38,7 @@ public record KakaoOAuth2Response(
     @Override
     public Member toMember() {
         String providerId = String.valueOf(id);
-        String username = KAKAO.getValue() + "_" + providerId;
+        String username = KAKAO.getRegistrationId() + "_" + providerId;
 
         return Member.builder()
                 .username(username)
