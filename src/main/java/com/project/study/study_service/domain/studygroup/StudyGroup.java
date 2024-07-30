@@ -19,6 +19,10 @@ public class StudyGroup extends AuditingField {
     private String name;
 
     @Setter
+    @Column(nullable = false, length = 60)
+    private String goal;
+
+    @Setter
     @Column(nullable = false, length = 3000)
     private String description;
 

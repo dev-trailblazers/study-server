@@ -1,6 +1,8 @@
 package com.project.study.study_service.controller;
 
+import com.project.study.study_service.domain.recruitment.RecruitmentDto;
 import com.project.study.study_service.domain.studygroup.StudyGroupDto;
+import com.project.study.study_service.service.RecruitmentService;
 import com.project.study.study_service.service.StudyGroupService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class StudyGroupController {
     private final StudyGroupService studyGroupService;
+    private final RecruitmentService recruitmentService;
 
     @GetMapping("/{id}")
     public ResponseEntity<StudyGroupDto> getStudyGroup(@PathVariable Long id){
@@ -27,4 +30,9 @@ public class StudyGroupController {
         return ResponseEntity.status(HttpStatus.CREATED).body(studyGroupDto);
     }
 
+
+    @PostMapping("/recruitment")
+    public void createRecruitment(@RequestBody @Valid RecruitmentDto.Request dto){
+        recruitmentService.registerRecruitment(dto);
+    }
 }
