@@ -1,4 +1,4 @@
-package com.project.study.study_service.domain;
+package com.project.study.study_service.domain.studygroup;
 
 import jakarta.validation.constraints.Min;
 import lombok.Builder;
