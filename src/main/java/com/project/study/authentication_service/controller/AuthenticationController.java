@@ -31,7 +31,7 @@ public class AuthenticationController {
     private final EmailService emailService;
 
     @PostMapping("/reissue")
-    public void reissueToken(HttpServletRequest request, HttpServletResponse response) {
+    public void createTokens(HttpServletRequest request, HttpServletResponse response) {
         Cookie[] cookies = request.getCookies();
         if(cookies == null){
             throw new IllegalArgumentException("쿠키가 존재하지 않습니다.");
@@ -57,7 +57,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/new/email")
-    public void requestVerificationCodeForEmail(@RequestBody @MemberEmail String email){
+    public void createVerificationCodeForEmail(@RequestBody @MemberEmail String email){
         emailService.sendVerificationCode(email);
     }
 

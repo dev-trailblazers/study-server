@@ -24,12 +24,12 @@ public class MemberController {
 
 
     @PostMapping("/join/username")
-    public ResponseEntity<Boolean> duplicationCheckForUsername(@RequestBody String username){
+    public ResponseEntity<Boolean> getIsDuplicatedForUsername(@RequestBody String username){
         return ResponseEntity.ok(memberService.checkDuplicateUsername(username));
     }
 
     @PostMapping("/join")
-    public void joinMember(@RequestBody @Valid JoinDto dto){
+    public void createMember(@RequestBody @Valid JoinDto dto){
         if(memberService.checkDuplicateUsername(dto.getUsername())){
             throw new IllegalArgumentException("아이디는 중복될 수 없습니다.");
         }

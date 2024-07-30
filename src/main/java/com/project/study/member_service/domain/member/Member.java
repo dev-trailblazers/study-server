@@ -61,7 +61,8 @@ public class Member extends AuditingField {
     @Builder
     public Member(Long id, String username, String password, String email, String name,
                   LocalDate birth, Gender gender, String profile_image, RoleType role,
-                  JoinPlatform joinPlatform, boolean isLocked, boolean useYn, Long modifiedBy) {
+                  JoinPlatform joinPlatform, boolean isLocked, boolean useYn,
+                  Long createdBy, Long modifiedBy) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -74,6 +75,7 @@ public class Member extends AuditingField {
         this.joinPlatform = joinPlatform;
         this.isLocked = isLocked;
         this.useYn = useYn;
+        super.createdBy = createdBy;
         super.modifiedBy = modifiedBy;
     }
 

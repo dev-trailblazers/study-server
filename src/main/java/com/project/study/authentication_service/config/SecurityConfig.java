@@ -172,7 +172,8 @@ public class SecurityConfig {
 
             String dummyPassword = passwordEncoder.encode("{bcrypt}" + UUID.randomUUID());
             member.setPassword(dummyPassword);
-            member.setModifiedBy(0L);   //현재 유저의 아이디가 없는 상태이므로 0으로 설정
+            member.setCreatedBy(0L);     //현재 유저의 아이디가 없는 상태이므로 0으로 설정
+            member.setModifiedBy(0L);
 
             //로그아웃 시 OAuth2에서도 로그아웃 할 것이기 때문에 OAuth2AccessToken을 저장한다.
             OAuth2AccessToken accessToken = userRequest.getAccessToken();
