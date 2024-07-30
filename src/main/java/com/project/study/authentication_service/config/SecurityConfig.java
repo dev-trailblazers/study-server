@@ -77,7 +77,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .requestMatchers(
-                                "/", "/error", "/api/v1/auth/**", "/api/v1/member/join/**"
+                                "/", "/error", "/v3/api-docs/**", "/swagger-ui/**",
+                                "/api/v1/auth/**", "/api/v1/member/join/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
