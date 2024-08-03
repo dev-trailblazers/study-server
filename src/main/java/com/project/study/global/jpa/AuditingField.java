@@ -31,11 +31,11 @@ public abstract class AuditingField {
 
     @Setter
     @CreatedBy
-    @Column(nullable = false)
+    @Column(updatable = false)
     protected Long createdBy;
 
     @Setter
     @LastModifiedBy
-    @Column(nullable = false)
+    @Column
     protected Long modifiedBy;
 }
