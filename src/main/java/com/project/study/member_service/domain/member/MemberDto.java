@@ -141,7 +141,8 @@ public class MemberDto {
                     .profile_image(this.profileImage)
                     .joinPlatform(joinPlatform)
                     .role(RoleType.ROLE_USER) // Default role for new members
-                    .modifiedBy(0L)
+                    .isLocked(false)
+                    .useYn(true)
                     .build();
         }
     }

@@ -58,6 +58,10 @@ public class Member extends AuditingField {
     private boolean useYn = true;          //계정 사용 여부
 
 
+    public Member(Long id) {
+        this.id = id;
+    }
+
     @Builder
     public Member(Long id, String username, String password, String email, String name,
                   LocalDate birth, Gender gender, String profile_image, RoleType role,
