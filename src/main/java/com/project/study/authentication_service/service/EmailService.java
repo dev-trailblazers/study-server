@@ -27,18 +27,18 @@ public class EmailService {
 
     public void sendVerificationCode(String email) {
         String code = generateVerificationCode();
-        MimeMessage message = createMail(email, code);
+        MimeMessage message = generateEmailForVerify(email, code);
         javaMailSender.send(message);
 
         saveEmailAuthentication(new EmailVerify(email, code));
     }
 
     public boolean checkVerificationCodeForEmail(EmailVerifyDto dto) {
-        EmailVerify auth = findByEmail(dto.email())
+        EmailVerify auth = fetchByEmail(dto.email())
                 .orElseThrow(() -> new IllegalArgumentException("이메일 인증 요청이 존재하지 않습니다."));
 
         String code = auth.getCode();
-        if(code.equals(dto.code())){
+        if (code.equals(dto.code())) {
             auth.setStatus(true);
             saveEmailAuthentication(auth);
             return true;
@@ -46,12 +46,12 @@ public class EmailService {
         return false;
     }
 
-    public Optional<EmailVerify> findByEmail(String email){
-        return Optional.of((EmailVerify) redisTemplate.opsForValue().get(email));
+    public Optional<EmailVerify> fetchByEmail(String email) {
+        return Optional.ofNullable((EmailVerify) redisTemplate.opsForValue().get(email));
     }
 
 
-    private MimeMessage createMail(String mail, String verificationCode) {
+    private MimeMessage generateEmailForVerify(String mail, String verificationCode) {
         MimeMessage message = javaMailSender.createMimeMessage();
 
         try {
@@ -87,8 +87,7 @@ public class EmailService {
         return String.format("%06d", (int) (Math.random() * 1_000_000));
     }
 
-    private void saveEmailAuthentication(EmailVerify emailVerify){
-        redisTemplate.opsForValue()
-                .set(emailVerify.getEmail(), emailVerify, 5, TimeUnit.MINUTES);
+    private void saveEmailAuthentication(EmailVerify emailVerify) {
+        redisTemplate.opsForValue().set(emailVerify.getEmail(), emailVerify, 5, TimeUnit.MINUTES);
     }
 }

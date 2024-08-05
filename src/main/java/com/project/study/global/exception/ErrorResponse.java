@@ -12,8 +12,6 @@ import java.util.List;
 @Builder
 @RequiredArgsConstructor
 public class ErrorResponse {
-
-    private final String code;
     private final String message;
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY) //@Valid 검증을 통과하지 못한 필드가 있을 때만 출력
