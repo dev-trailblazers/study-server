@@ -1,12 +1,14 @@
 package com.project.study.authentication_service.config;
 
 
+import com.project.study.global.filter.LoggingFilter;
 import com.project.study.member_service.domain.member.JoinPlatform;
 import com.project.study.member_service.domain.member.Member;
 import com.project.study.authentication_service.service.AuthenticationService;
 import com.project.study.authentication_service.domain.user.CustomUserDetails;
 import com.project.study.authentication_service.domain.user.oauth2.KakaoOAuth2Response;
 import com.project.study.authentication_service.domain.user.oauth2.OAuth2Response;
+import com.project.study.member_service.domain.member.MemberDto;
 import com.project.study.member_service.service.MemberService;
 import com.project.study.authentication_service.service.OAuth2Service;
 import jakarta.servlet.FilterChain;
@@ -44,6 +46,7 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -93,6 +96,7 @@ public class SecurityConfig {
                         ).successHandler(customOAuth2LoginSuccessHandler())
                         .failureHandler(customAuthenticationFailureHandler())
                 )
+                .addFilterBefore(new LoggingFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new TokenAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterAt(
                         new CustomAuthenticationFilter(authenticationManager(authenticationConfiguration)),
@@ -169,9 +173,7 @@ public class SecurityConfig {
             }
 
             Member member = oAuth2Response.toMember();
-
-            String dummyPassword = passwordEncoder.encode("{bcrypt}" + UUID.randomUUID());
-            member.setPassword(dummyPassword);
+            MemberDto.JoinDto joinDto = MemberDto.JoinDto.fromEntity(member);
 
             //로그아웃 시 OAuth2에서도 로그아웃 할 것이기 때문에 OAuth2AccessToken을 저장한다.
             OAuth2AccessToken accessToken = userRequest.getAccessToken();
@@ -182,7 +184,7 @@ public class SecurityConfig {
              */
             return memberService.findAvailableMemberByUsername(member.getUsername())
                     .map(CustomUserDetails::new)
-                    .orElseGet(() -> new CustomUserDetails(memberService.save(member)));
+                    .orElseGet(() -> new CustomUserDetails(memberService.join(joinDto)));
         };
     }
 
@@ -193,11 +195,10 @@ public class SecurityConfig {
                                         HttpServletResponse response,
                                         FilterChain filterChain) throws ServletException, IOException {
             //인증 대상에서 제외된 URL 인증 스킵
+            AntPathMatcher antPathMatcher = new AntPathMatcher();
             String path = request.getRequestURI();
             boolean isExcluded = EXCLUDED_PATHS.stream()
-                    .anyMatch(excludedPath -> path
-                            .matches(excludedPath.replace("**", ".*"))
-                    );
+                    .anyMatch(excludedPath -> antPathMatcher.match(excludedPath, path));
             if (isExcluded) {
                 filterChain.doFilter(request, response);
                 return;
