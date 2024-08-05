@@ -1,5 +1,6 @@
 package com.project.study.study_service.domain.recruitment;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.project.study.study_service.domain.studygroup.StudyGroup;
 import com.project.study.study_service.domain.studygroup.StudyGroupDto;
 import jakarta.validation.constraints.Future;
@@ -21,7 +22,9 @@ public class RecruitmentDto {
     private String title;        // 모집 글 제목
     private String summary;      // 모집 글 요약 설명 (간단한 개요)
     private String details;      // 모집 글 상세 설명
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime startDate; // 모집 시작일
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime endDate;   // 모집 종료일
     private int maxParticipants; // 최대 모집 인원 수
     private StudyGroupDto studyGroupDto;
@@ -75,5 +78,16 @@ public class RecruitmentDto {
                     .studyGroup(new StudyGroup(studyId))
                     .build();
         }
+    }
+
+    @Getter
+    public static class SearchCondition{
+        private String keyword;
+        private SearchType searchType;
+        private RecruitmentStatus status;
+    }
+
+    public enum SearchType{
+        GOAL, NAME
     }
 }

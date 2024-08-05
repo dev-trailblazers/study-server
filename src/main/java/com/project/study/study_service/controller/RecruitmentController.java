@@ -22,22 +22,14 @@ public class RecruitmentController {
 
     @GetMapping("/list")
     public ResponseEntity<Page<RecruitmentDto>> pageRecruitingStudyGroup(
-            @RequestParam(required = false) RecruitmentStatus status,
-            @RequestParam(defaultValue = "") String keyword,
+            @RequestBody RecruitmentDto.SearchCondition searchCondition,
             @PageableDefault(page = 0, size = 10) Pageable pageable) {
-
         Page<RecruitmentDto> dtos;
-        if (status == null) {
-            dtos = recruitmentService.fetchStudyGroup(keyword, pageable);
+        if (searchCondition.getStatus() == null) {
+            dtos = recruitmentService.fetchStudyGroup(searchCondition, pageable);
             return ResponseEntity.ok(dtos);
         }
-
-        switch (status) {
-            case SCHEDULED -> dtos = recruitmentService.fetchStudyGroupByScheduled(keyword, pageable);
-            case IN_PROGRESS -> dtos = recruitmentService.fetchStudyGroupByProgress(keyword, pageable);
-            case CLOSED -> dtos = recruitmentService.fetchStudyGroupByClosed(keyword, pageable);
-            default -> throw new IllegalArgumentException(status + ": 잘못된 파라미터 입니다.");
-        }
+        dtos = recruitmentService.fetchStudyByStatus(searchCondition, pageable);
         return ResponseEntity.ok(dtos);
     }
 

@@ -2,6 +2,8 @@ package com.project.study.study_service.service;
 
 import com.project.study.study_service.domain.recruitment.Recruitment;
 import com.project.study.study_service.domain.recruitment.RecruitmentDto;
+import com.project.study.study_service.domain.recruitment.RecruitmentDto.SearchCondition;
+import com.project.study.study_service.domain.recruitment.RecruitmentStatus;
 import com.project.study.study_service.repository.RecruitmentRepository;
 import com.project.study.study_service.repository.StudyGroupRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,33 +32,27 @@ public class RecruitmentService {
                 .ifPresent(recruitment -> {
                     throw new IllegalArgumentException("이미 모집중인 스터디입니다.");
                 });
-
         recruitmentRepository.save(dto.toEntity());
     }
 
     @Transactional(readOnly = true)
-    public Page<RecruitmentDto> fetchStudyGroup(String keyword, Pageable pageable) {
-        Page<Recruitment> recruitments = recruitmentRepository.findAllRecruitmentsWithSearch(keyword, pageable);
-       return recruitments.map(RecruitmentDto::fromEntity);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<RecruitmentDto> fetchStudyGroupByScheduled(String keyword, Pageable pageable) {
-        Page<Recruitment> recruitments = recruitmentRepository.findAllRecruitmentsByScheduledWithSearch(keyword, pageable);
-       return recruitments.map(RecruitmentDto::fromEntity);
-
-    }
-
-    @Transactional(readOnly = true)
-    public Page<RecruitmentDto> fetchStudyGroupByProgress(String keyword, Pageable pageable) {
-        Page<Recruitment> recruitments = recruitmentRepository.findAllRecruitmentsByInProgressWithSearch(keyword, pageable);
-       return recruitments.map(RecruitmentDto::fromEntity);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<RecruitmentDto> fetchStudyGroupByClosed(String keyword, Pageable pageable) {
-        Page<Recruitment> recruitments = recruitmentRepository.findAllRecruitmentsByClosedWithSearch(keyword, pageable);
+    public Page<RecruitmentDto> fetchStudyByStatus(SearchCondition searchCondition, Pageable pageable) {
+        Page<Recruitment> recruitments = recruitmentRepository.findRecruitmentsByStatusAndSearch(
+                searchCondition.getKeyword(),
+                searchCondition.getSearchType().name(),
+                searchCondition.getStatus().name(),
+                pageable);
         return recruitments.map(RecruitmentDto::fromEntity);
-
     }
+
+
+    @Transactional(readOnly = true)
+    public Page<RecruitmentDto> fetchStudyGroup(SearchCondition searchCondition, Pageable pageable) {
+        Page<Recruitment> recruitments = recruitmentRepository.findAllRecruitmentsWithSearch(
+                searchCondition.getKeyword(),
+                searchCondition.getSearchType().name(),
+                pageable);
+       return recruitments.map(RecruitmentDto::fromEntity);
+    }
+
 }
