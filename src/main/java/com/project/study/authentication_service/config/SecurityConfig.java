@@ -72,8 +72,10 @@ public class SecurityConfig {
     private String CLIENT_URL;
 
     private static final Set<String> EXCLUDED_PATHS = Set.of(
-            "/error", "/v3/api-docs/**", "/swagger-ui/**",
-            "/api/v1/auth/**", "/api/v1/member/join/**"
+            "/error/**", "/v3/api-docs/**", "/swagger-ui/**",
+            "/login/**", "/logout/**",
+            "/api/v1/auth/**", "/api/v1/member/join/**",
+            "/api/v1/study-group/detail/**"
     );
 
     @Bean
