@@ -74,8 +74,10 @@ public class SecurityConfig {
     private static final Set<String> EXCLUDED_PATHS = Set.of(
             "/error/**", "/v3/api-docs/**", "/swagger-ui/**",
             "/login/**", "/logout/**",
-            "/api/v1/auth/**", "/api/v1/member/join/**",
-            "/api/v1/study-group/detail/**"
+            "/api/v1/auth/**",
+            "/api/v1/member/join/**",
+            "/api/v1/study-group/detail/**",
+            "/api/v1/recruitment/list/**"
     );
 
     @Bean

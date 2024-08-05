@@ -29,4 +29,9 @@ public class StudyGroup extends AuditingField {
     @Setter
     @Column(nullable = false)
     private int headCount;
+
+
+    public StudyGroup(Long id) {
+        this.id = id;
+    }
 }

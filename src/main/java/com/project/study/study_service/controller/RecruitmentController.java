@@ -1,6 +1,7 @@
 package com.project.study.study_service.controller;
 
 
+import com.project.study.authentication_service.domain.user.CustomUserDetails;
 import com.project.study.study_service.domain.recruitment.RecruitmentDto;
 import com.project.study.study_service.domain.recruitment.RecruitmentStatus;
 import com.project.study.study_service.service.RecruitmentService;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -39,9 +41,10 @@ public class RecruitmentController {
         return ResponseEntity.ok(dtos);
     }
 
-    @PostMapping("/recruitment")
-    public void createRecruitment(@RequestBody @Valid RecruitmentDto.Request dto) {
-        recruitmentService.registerRecruitment(dto);
+    @PostMapping("/new")
+    public void createRecruitment(@RequestBody @Valid RecruitmentDto.Request dto,
+                                  @AuthenticationPrincipal CustomUserDetails user) {
+        recruitmentService.registerRecruitment(user.getId(), dto);
     }
     
 }

@@ -19,26 +19,26 @@ public class Recruitment extends AuditingField {
     private Long id;
 
     @Column(nullable = false, length = 100)
-    private String title;   // 모집 글 제목
+    private String title;
 
     @Column(nullable = false, length = 500)
-    private String summary; // 모집 글 요약 설명 (간단한 개요)
+    private String summary;
 
     @Column(nullable = false, length = 5000)
-    private String details; // 모집 글 상세 설명
+    private String details;
 
     @Column(nullable = false)
-    private LocalDateTime startDate;    // 모집 시작일
+    private LocalDateTime startDate;
 
     @Column(nullable = false)
-    private LocalDateTime endDate;      // 모집 종료일
+    private LocalDateTime endDate;
 
     @Column(nullable = false)
-    private int maxParticipants;    // 최대 모집 인원 수
+    private int maxParticipants;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "study_group_id", nullable = false)
-    private StudyGroup studyGroup;  // 연관된 스터디 그룹
+    private StudyGroup studyGroup;
 
 }
 
