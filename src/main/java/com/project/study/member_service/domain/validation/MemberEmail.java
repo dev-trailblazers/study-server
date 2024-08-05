@@ -18,7 +18,7 @@ import java.lang.annotation.Target;
 @Length(min = 2, max = 30)
 @Email
 public @interface MemberEmail {
-    String message() default "이메일 형식을 지켜주세요.";
+    String message() default "";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

@@ -14,9 +14,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @NotBlank
-@Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=!]).{8,16}$")
+@Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[@#$%^&+=!]).{8,16}$",
+        message = "비밀번호는 영문, 숫자, 특수 문자를 하나씩 포함한 8~16자리입니다.")
 public @interface Password {
-    String message() default "비밀번호는 영어 대소문자와 숫자, 특수문자를 하나씩 포함한 8~16자리입니다.";
+    String message() default "";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

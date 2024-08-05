@@ -15,9 +15,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.PARAMETER})
 @NotBlank
-@Pattern(regexp = "^(?=.*[a-z])(?=.*[0-9])[a-z0-9]{3,16}$")
+@Pattern(regexp = "^(?=.*[a-z])(?=.*[0-9])[a-z0-9]{3,16}$",
+        message = "아이디는 영소문자와 숫자를 하나씩 포함한 3~16자리입니다.")
 public @interface Username {
-    String message() default "아이디는 영소문자와 숫자를 하나씩 포함한 3~16자리입니다.";
+    String message() default "";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

@@ -1,7 +1,5 @@
-package com.project.study.member_service.dto;
+package com.project.study.member_service.domain.member;
 
-import com.project.study.member_service.domain.member.JoinPlatform;
-import com.project.study.member_service.domain.member.Member;
 import com.project.study.member_service.domain.member.Member.Gender;
 import com.project.study.member_service.domain.member.Member.RoleType;
 import com.project.study.member_service.domain.validation.MemberEmail;
@@ -105,7 +103,7 @@ public class MemberDto {
     public static class JoinDto {
         @Username
         private String username;
-        @Password
+        @Password(message = "비밀번호는 영문, 숫자, 특수 문자를 하나씩 포함한 8~16자리입니다.")
         private String password;
         @MemberEmail
         private String email;
@@ -118,7 +116,21 @@ public class MemberDto {
         private JoinPlatform joinPlatform;
 
 
+        public static JoinDto fromEntity(Member member){
+            return JoinDto.builder()
+                    .username(member.getUsername())
+                    .password(member.getPassword())
+                    .email(member.getEmail())
+                    .name(member.getName())
+                    .birth(member.getBirth())
+                    .gender(member.getGender())
+                    .profileImage(member.getProfile_image())
+                    .joinPlatform(member.getJoinPlatform())
+                    .build();
+        }
+
         public Member toEntity() {
+            JoinPlatform joinPlatform = this.joinPlatform == null ? JoinPlatform.BASIC : this.joinPlatform;
             return Member.builder()
                     .username(this.username)
                     .password(this.password)
@@ -127,7 +139,7 @@ public class MemberDto {
                     .birth(this.birth)
                     .gender(this.gender)
                     .profile_image(this.profileImage)
-                    .joinPlatform(this.joinPlatform)
+                    .joinPlatform(joinPlatform)
                     .role(RoleType.ROLE_USER) // Default role for new members
                     .modifiedBy(0L)
                     .build();

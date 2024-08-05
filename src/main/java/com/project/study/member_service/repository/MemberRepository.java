@@ -15,4 +15,5 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Query("SELECT m FROM Member m WHERE m.username = :username AND m.isLocked = false AND m.useYn = true")
     Optional<Member> findAvailableMemberByUsername(String username);
 
+    Optional<Member> findByEmail(String email);
 }

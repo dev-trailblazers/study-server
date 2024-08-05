@@ -1,7 +1,7 @@
 package com.project.study.member_service.service;
 
 import com.project.study.member_service.domain.member.Member;
-import com.project.study.member_service.dto.MemberDto.JoinDto;
+import com.project.study.member_service.domain.member.MemberDto;
 import com.project.study.member_service.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -38,11 +38,15 @@ public class MemberService {
     }
 
 
-    public void join(JoinDto dto) {
+    public Member join(MemberDto.JoinDto dto) {
+        memberRepository.findByEmail(dto.getEmail())
+                .ifPresent(o -> {
+                    throw new IllegalArgumentException("이미 가입된 이메일입니다.");
+                });
         Member entity = dto.toEntity();
         String encodedPassword = passwordEncoder.encode(entity.getPassword());
         entity.setPassword(encodedPassword);
 
-        memberRepository.save(entity);
+        return memberRepository.save(entity);
     }
 }
