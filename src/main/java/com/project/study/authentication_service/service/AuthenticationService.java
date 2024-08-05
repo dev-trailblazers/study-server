@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.Map;
@@ -97,6 +98,7 @@ public class AuthenticationService {
      * <p>
      * 기존 토큰을 삭제하고 새로운 리프레시 토큰과 액세스 토큰을 발급한다.
      */
+    @Transactional(readOnly = true)
     public Map<TokenType, String> reissuanceToken(String refreshToken) {
         if (!redisTemplate.hasKey(refreshToken)) {
             throw new IllegalArgumentException("사용할 수 없는 리프레시 토큰입니다.");

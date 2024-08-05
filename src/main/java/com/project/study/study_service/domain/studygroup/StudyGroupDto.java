@@ -1,6 +1,7 @@
 package com.project.study.study_service.domain.studygroup;
 
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -24,8 +25,12 @@ public class StudyGroupDto {
     //JSON to Java Object => 기본생성자 + Getter or Setter = 둘 중 하나만 있으면 됨
     @Getter
     public static class Request {
+        @NotBlank(message = "스터디그룹 이름은 필수 항목입니다.")
         private String name;
+
+        @NotBlank(message = "스터디에 대한 설명은 필수 항목입니다.")
         private String description;
+
         @Min(value = 4, message = "스터디그룹의 최소 인원은 4명입니다.")
         private int headcount;
 

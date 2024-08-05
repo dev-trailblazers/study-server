@@ -8,9 +8,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Transactional
 @RequiredArgsConstructor
 @Service
 public class RecruitmentService {
@@ -22,32 +24,29 @@ public class RecruitmentService {
         recruitmentRepository.save(dto.toEntity());
     }
 
+    @Transactional(readOnly = true)
     public Page<RecruitmentDto> fetchStudyGroup(String keyword, Pageable pageable) {
         Page<Recruitment> recruitments = recruitmentRepository.findAllRecruitmentsWithSearch(keyword, pageable);
-        return convertRecruitmentToDTO(recruitments);
+       return recruitments.map(RecruitmentDto::fromEntity);
     }
 
+    @Transactional(readOnly = true)
     public Page<RecruitmentDto> fetchStudyGroupByScheduled(String keyword, Pageable pageable) {
         Page<Recruitment> recruitments = recruitmentRepository.findAllRecruitmentsByScheduledWithSearch(keyword, pageable);
-        return convertRecruitmentToDTO(recruitments);
+       return recruitments.map(RecruitmentDto::fromEntity);
 
     }
 
+    @Transactional(readOnly = true)
     public Page<RecruitmentDto> fetchStudyGroupByProgress(String keyword, Pageable pageable) {
         Page<Recruitment> recruitments = recruitmentRepository.findAllRecruitmentsByInProgressWithSearch(keyword, pageable);
-        return convertRecruitmentToDTO(recruitments);
+       return recruitments.map(RecruitmentDto::fromEntity);
     }
 
+    @Transactional(readOnly = true)
     public Page<RecruitmentDto> fetchStudyGroupByClosed(String keyword, Pageable pageable) {
         Page<Recruitment> recruitments = recruitmentRepository.findAllRecruitmentsByClosedWithSearch(keyword, pageable);
-        return convertRecruitmentToDTO(recruitments);
+        return recruitments.map(RecruitmentDto::fromEntity);
 
-    }
-
-    private Page<RecruitmentDto> convertRecruitmentToDTO(Page<Recruitment> recruitments) {
-        List<RecruitmentDto> dtos = recruitments.stream()
-                .map(RecruitmentDto::fromEntity)
-                .toList();
-        return new PageImpl<>(dtos, recruitments.getPageable(), recruitments.getTotalElements());
     }
 }
