@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 public class StudyGroupController {
     private final StudyGroupService studyGroupService;
 
-    @GetMapping("/{id}")
+    @GetMapping("/detail/{id}")
     public ResponseEntity<StudyGroupDto> getStudyGroup(@PathVariable Long id) {
         StudyGroupDto studyGroupDto = studyGroupService.fetchStudyGroup(id);
         return ResponseEntity.ok(studyGroupDto);
