@@ -3,6 +3,7 @@ package com.project.study.study_service.repository;
 import com.project.study.study_service.domain.applications.ApplicationStatus;
 import com.project.study.study_service.domain.applications.Applications;
 import com.project.study.study_service.domain.applications.ApplicationsDto;
+import com.project.study.study_service.domain.applications.ApplicationsDto.ApplicationSearchCriteria;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,7 +26,7 @@ public interface ApplicationRepository extends JpaRepository<Applications, Long>
             "WHERE a.member.id = :#{#criteria.memberId} " +
             "AND a.studyGroup.name LIKE CONCAT('%', :#{#criteria.studyName}, '%')")
     Page<Applications> findAllByMemberIdAndStudyName(
-            @Param("criteria") ApplicationsDto.ApplicationSearchCriteria criteria,
+            @Param("criteria") ApplicationSearchCriteria criteria,
             Pageable pageable);
 
 
@@ -35,6 +36,6 @@ public interface ApplicationRepository extends JpaRepository<Applications, Long>
             "AND a.studyGroup.name LIKE CONCAT('%', :#{#criteria.studyName}, '%') " +
             "AND a.status = :#{#criteria.status}")
     Page<Applications> findAllByMemberIdAndStudyNameAndStatus(
-            @Param("criteria") ApplicationsDto.ApplicationSearchCriteria criteria,
+            @Param("criteria") ApplicationSearchCriteria criteria,
             Pageable pageable);
 }
