@@ -50,11 +50,11 @@ pipeline {
                 script {
                     sshagent([SSH_CREDENTIALS_ID]) {
                         sh """
-                        ssh ${DEPLOY_SERVER_USER}@${DEPLOY_SERVER_IP} 'docker stop ${IMAGE_NAME} || true'
-                        ssh ${DEPLOY_SERVER_USER}@${DEPLOY_SERVER_IP} 'docker rm ${IMAGE_NAME} || true'
-                        ssh ${DEPLOY_SERVER_USER}@${DEPLOY_SERVER_IP} 'docker rmi ${DOCKER_REGISTRY}/${IMAGE_NAME} || true'
-                        ssh ${DEPLOY_SERVER_USER}@${DEPLOY_SERVER_IP} 'docker pull ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}'
-                        ssh ${DEPLOY_SERVER_USER}@${DEPLOY_SERVER_IP} 'docker run -d -p 56789:56789 --name ${IMAGE_NAME} ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}'
+                        ssh -p 22123 ${DEPLOY_SERVER_USER}@${DEPLOY_SERVER_IP} 'docker stop ${IMAGE_NAME} || true'
+                        ssh -p 22123 ${DEPLOY_SERVER_USER}@${DEPLOY_SERVER_IP} 'docker rm ${IMAGE_NAME} || true'
+                        ssh -p 22123 ${DEPLOY_SERVER_USER}@${DEPLOY_SERVER_IP} 'docker rmi ${DOCKER_REGISTRY}/${IMAGE_NAME} || true'
+                        ssh -p 22123 ${DEPLOY_SERVER_USER}@${DEPLOY_SERVER_IP} 'docker pull ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}'
+                        ssh -p 22123 ${DEPLOY_SERVER_USER}@${DEPLOY_SERVER_IP} 'docker run --platform linux/amd64 -d -p 56789:56789 --name ${IMAGE_NAME} ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}'
                         """
                     }
                 }
