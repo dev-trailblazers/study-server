@@ -73,7 +73,7 @@ public class SecurityConfig {
             "/error/**", "/v3/api-docs/**", "/swagger-ui/**",
             "/login/**", "/logout/**",
             "/api/v1/auth/**",
-            "/api/v1/member/join/**",
+            "/api/v1/member/join/**", "/api/v1/member/username",
             "/api/v1/study/detail/**",
             "/api/v1/recruitment/list/**"
     );

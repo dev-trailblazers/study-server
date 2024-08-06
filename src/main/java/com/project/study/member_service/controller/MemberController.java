@@ -24,7 +24,7 @@ public class MemberController {
     private final EmailService emailService;
 
 
-    @PostMapping("/join/username")
+    @PostMapping("/username")
     public ResponseEntity<Boolean> getIsDuplicatedForUsername(@RequestBody String username){
         return ResponseEntity.ok(memberService.checkDuplicateUsername(username));
     }
