@@ -1,23 +1,26 @@
 package com.project.study.study_service.service;
 
-import com.project.study.study_service.domain.applications.ApplicationStatus;
 import com.project.study.study_service.domain.applications.Applications;
 import com.project.study.study_service.domain.applications.ApplicationsDto;
-import com.project.study.study_service.domain.studygroup.StudyGroup;
+import com.project.study.study_service.domain.participants.ParticipantRole;
+import com.project.study.study_service.domain.participants.Participants;
 import com.project.study.study_service.repository.ApplicationRepository;
+import com.project.study.study_service.repository.ParticipantRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.project.study.study_service.domain.applications.ApplicationStatus.WAITING;
+import static com.project.study.study_service.domain.applications.ApplicationStatus.*;
 
 @Transactional
 @RequiredArgsConstructor
 @Service
 public class ApplicationService {
     private final ApplicationRepository applicationRepository;
+    private final ParticipantRepository participantRepository;
+
 
     public void registerApplication(ApplicationsDto.RegistrationRequest dto) {
         applicationRepository.findByMemberAndStudyAndStatus(
@@ -31,19 +34,19 @@ public class ApplicationService {
         applicationRepository.save(applications);
     }
 
-    public void updateApplicationStatus(Long id, Long memberId, ApplicationStatus status) {
-        Applications application = applicationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("id: " + id + "에 해당하는 신청서가 존재하지 않습니다."));
+    public void refuseApplication(Long id, Long memberId) {
+        Applications applications = validateApprovalCondition(id, memberId);
+        applications.setStatus(REFUSED);
+    }
 
-        StudyGroup studyGroup = application.getStudyGroup();
-        //todo: 추후에는 방장으로 검사가 아닌 참가자 권한으로 구분해야할 수 있음
-        if(studyGroup.getCreatedBy() != memberId) {
-            throw new IllegalArgumentException("해당 신청서에 대한 권한이 없습니다.");
-        }
-        //WAITING 상태에서만 변경할 수 있음
-        if(application.getStatus() == WAITING && status != WAITING) {
-            application.setStatus(status);
-        }
+    public void approveApplication(Long applicationId, Long memberId) {
+        Applications applications = validateApprovalCondition(applicationId, memberId);
+        applications.setStatus(APPROVED);
+        participantRepository.save(Participants.builder()
+                .member(applications.getMember())
+                .studyGroup(applications.getStudyGroup())
+                .role(ParticipantRole.ATTENDEE)
+                .build());
     }
 
     @Transactional(readOnly = true)
@@ -55,5 +58,18 @@ public class ApplicationService {
         }
         Page<Applications> applications = applicationRepository.findAllByMemberIdAndStudyNameAndStatus(criteria, pageable);
         return applications.map(ApplicationsDto::fromEntity);
+    }
+
+
+    private Applications validateApprovalCondition(Long id, Long memberId) {
+        Applications application = applicationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("id: " + id + "에 해당하는 신청서가 존재하지 않습니다."));
+        if (application.getStudyGroup().getCreatedBy() != memberId) {
+            throw new IllegalArgumentException("해당 신청에 대한 권한이 없습니다.");
+        }
+        if (application.getStatus() != WAITING) {
+            throw new IllegalArgumentException("대기 중인 신청만 결재할 수 있습니다.");
+        }
+        return application;
     }
 }
