@@ -3,6 +3,7 @@ package com.project.study.study_service.controller;
 import com.project.study.authentication_service.domain.user.CustomUserDetails;
 import com.project.study.study_service.domain.applications.ApplicationStatus;
 import com.project.study.study_service.domain.applications.ApplicationsDto;
+import com.project.study.study_service.domain.applications.ApplicationsDto.RegistrationRequest;
 import com.project.study.study_service.service.ApplicationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,20 +23,29 @@ public class ApplicationController {
 
     @PostMapping("/new/{studyId}")
     public ResponseEntity<Void> createApplication(@PathVariable Long studyId,
-                                  @AuthenticationPrincipal CustomUserDetails user) {
-        ApplicationsDto.RegistrationRequest dto = ApplicationsDto.RegistrationRequest.builder()
+                                                  @AuthenticationPrincipal CustomUserDetails user) {
+        applicationService.registerApplication(RegistrationRequest.builder()
                 .memberId(user.getId())
                 .studyId(studyId)
-                .build();
-        applicationService.registerApplication(dto);
+                .build());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PatchMapping("/{applicationId}/{status}")
-    public void updateApplication(@PathVariable Long applicationId,
-                                  @PathVariable ApplicationStatus status,
-                                  @AuthenticationPrincipal CustomUserDetails user) {
-        applicationService.updateApplicationStatus(applicationId, user.getId(), status);
+    public ResponseEntity<Void> updateApplication(@PathVariable Long applicationId,
+                                                  @PathVariable ApplicationStatus status,
+                                                  @AuthenticationPrincipal CustomUserDetails user) {
+        return switch (status) {
+            case APPROVED -> {
+                applicationService.approveApplication(applicationId, user.getId());
+                yield ResponseEntity.status(HttpStatus.CREATED).build();
+            }
+            case REFUSED -> {
+                applicationService.refuseApplication(applicationId, user.getId());
+                yield ResponseEntity.status(HttpStatus.OK).build();
+            }
+            default -> throw new IllegalArgumentException("승인 혹은 반려 상태로만 변경할 수 있습니다.");
+        };
     }
 
     @GetMapping("/list")
