@@ -2,11 +2,9 @@ package com.project.study.study_service.domain.applications;
 
 import com.project.study.member_service.domain.member.Member;
 import com.project.study.study_service.domain.studygroup.StudyGroup;
-import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.domain.Pageable;
 
 @Getter
 @Builder

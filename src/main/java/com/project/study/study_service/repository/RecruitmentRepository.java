@@ -1,7 +1,6 @@
 package com.project.study.study_service.repository;
 
 import com.project.study.study_service.domain.recruitment.Recruitment;
-import com.project.study.study_service.domain.recruitment.RecruitmentStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

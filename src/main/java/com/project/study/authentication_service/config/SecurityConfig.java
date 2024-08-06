@@ -1,16 +1,16 @@
 package com.project.study.authentication_service.config;
 
 
-import com.project.study.global.filter.LoggingFilter;
-import com.project.study.member_service.domain.member.JoinPlatform;
-import com.project.study.member_service.domain.member.Member;
-import com.project.study.authentication_service.service.AuthenticationService;
 import com.project.study.authentication_service.domain.user.CustomUserDetails;
 import com.project.study.authentication_service.domain.user.oauth2.KakaoOAuth2Response;
 import com.project.study.authentication_service.domain.user.oauth2.OAuth2Response;
+import com.project.study.authentication_service.service.AuthenticationService;
+import com.project.study.authentication_service.service.OAuth2Service;
+import com.project.study.global.filter.LoggingFilter;
+import com.project.study.member_service.domain.member.JoinPlatform;
+import com.project.study.member_service.domain.member.Member;
 import com.project.study.member_service.domain.member.MemberDto;
 import com.project.study.member_service.service.MemberService;
-import com.project.study.authentication_service.service.OAuth2Service;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -27,7 +27,6 @@ import org.springframework.security.authentication.*;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -53,7 +52,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 import static com.project.study.authentication_service.domain.jwt.TokenType.REFRESH_TOKEN;
 import static com.project.study.member_service.domain.member.JoinPlatform.KAKAO;
@@ -76,7 +74,7 @@ public class SecurityConfig {
             "/login/**", "/logout/**",
             "/api/v1/auth/**",
             "/api/v1/member/join/**",
-            "/api/v1/study-group/detail/**",
+            "/api/v1/study/detail/**",
             "/api/v1/recruitment/list/**"
     );
 

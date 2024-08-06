@@ -3,7 +3,6 @@ package com.project.study.study_service.controller;
 
 import com.project.study.authentication_service.domain.user.CustomUserDetails;
 import com.project.study.study_service.domain.recruitment.RecruitmentDto;
-import com.project.study.study_service.domain.recruitment.RecruitmentStatus;
 import com.project.study.study_service.service.RecruitmentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -38,5 +37,5 @@ public class RecruitmentController {
                                   @AuthenticationPrincipal CustomUserDetails user) {
         recruitmentService.registerRecruitment(user.getId(), dto);
     }
-    
+
 }

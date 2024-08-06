@@ -3,7 +3,10 @@ package com.project.study.study_service.domain.recruitment;
 import com.project.study.global.jpa.AuditingField;
 import com.project.study.study_service.domain.studygroup.StudyGroup;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 

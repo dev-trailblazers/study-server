@@ -1,14 +1,13 @@
 package com.project.study.member_service.controller;
 
 
-import com.project.study.member_service.domain.email.EmailVerify;
 import com.project.study.authentication_service.service.EmailService;
+import com.project.study.member_service.domain.email.EmailVerify;
 import com.project.study.member_service.domain.member.MemberDto;
 import com.project.study.member_service.service.MemberService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

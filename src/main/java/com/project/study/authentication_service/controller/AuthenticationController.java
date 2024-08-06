@@ -1,10 +1,10 @@
 package com.project.study.authentication_service.controller;
 
-import com.project.study.authentication_service.service.AuthenticationService;
 import com.project.study.authentication_service.domain.jwt.TokenType;
+import com.project.study.authentication_service.service.AuthenticationService;
+import com.project.study.authentication_service.service.EmailService;
 import com.project.study.member_service.domain.email.EmailVerifyDto;
 import com.project.study.member_service.domain.validation.MemberEmail;
-import com.project.study.authentication_service.service.EmailService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

@@ -1,8 +1,6 @@
 package com.project.study.study_service.repository;
 
-import com.project.study.study_service.domain.applications.ApplicationStatus;
 import com.project.study.study_service.domain.applications.Applications;
-import com.project.study.study_service.domain.applications.ApplicationsDto;
 import com.project.study.study_service.domain.applications.ApplicationsDto.ApplicationSearchCriteria;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

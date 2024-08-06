@@ -3,18 +3,13 @@ package com.project.study.study_service.service;
 import com.project.study.study_service.domain.recruitment.Recruitment;
 import com.project.study.study_service.domain.recruitment.RecruitmentDto;
 import com.project.study.study_service.domain.recruitment.RecruitmentDto.SearchCondition;
-import com.project.study.study_service.domain.recruitment.RecruitmentStatus;
 import com.project.study.study_service.repository.RecruitmentRepository;
 import com.project.study.study_service.repository.StudyGroupRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Optional;
 
 @Transactional
 @RequiredArgsConstructor
