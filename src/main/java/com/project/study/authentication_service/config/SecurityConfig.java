@@ -52,6 +52,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import static com.project.study.authentication_service.domain.jwt.TokenType.REFRESH_TOKEN;
 import static com.project.study.member_service.domain.member.JoinPlatform.KAKAO;
@@ -79,7 +80,7 @@ public class SecurityConfig {
     );
 
     @Bean
-    public SecurityFilterChain config(HttpSecurity http, PasswordEncoder passwordEncoder) throws Exception {
+    public SecurityFilterChain config(HttpSecurity http) throws Exception {
         return http
                 .csrf(auth -> auth.disable())
                 .cors(cors -> cors.disable())
@@ -94,7 +95,7 @@ public class SecurityConfig {
                 //OAuth2 Login Request URL Pattern = {baseUrl}/oauth2/authorization/{provider}
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(user -> user.userService(
-                                customOAuth2UserService(passwordEncoder))
+                                customOAuth2UserService())
                         ).successHandler(customOAuth2LoginSuccessHandler())
                         .failureHandler(customAuthenticationFailureHandler())
                 )
@@ -158,7 +159,7 @@ public class SecurityConfig {
      * userInfoEndPoint에서 OAuth2 유저 정보를 가져오는 로직을 담당한다.
      */
     @Bean
-    public OAuth2UserService<OAuth2UserRequest, OAuth2User> customOAuth2UserService(PasswordEncoder passwordEncoder) {
+    public OAuth2UserService<OAuth2UserRequest, OAuth2User> customOAuth2UserService() {
         final DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
 
         return userRequest -> {
@@ -176,6 +177,7 @@ public class SecurityConfig {
 
             Member member = oAuth2Response.toMember();
             MemberDto.JoinDto joinDto = MemberDto.JoinDto.fromEntity(member);
+            member.setPassword(UUID.randomUUID().toString());
 
             //로그아웃 시 OAuth2에서도 로그아웃 할 것이기 때문에 OAuth2AccessToken을 저장한다.
             OAuth2AccessToken accessToken = userRequest.getAccessToken();
