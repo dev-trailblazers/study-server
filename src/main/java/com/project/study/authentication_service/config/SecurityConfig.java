@@ -295,8 +295,11 @@ public class SecurityConfig {
         public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
             SecurityContextHolder.clearContext();
 
-            //로그아웃 필터 이전에 인증 필터에서 토큰 검증을 진행했기 때문에 여기선 생략한다.
             String authorization = request.getHeader("Authorization");
+            if (authorization == null || !authorization.startsWith("Bearer ")) {
+                log.warn("잘못된 토큰 헤더 : {}", authorization);
+                return;
+            }
             String accessToken = authorization.split(" ")[1];
 
             /*
