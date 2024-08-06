@@ -1,3 +1,7 @@
+secrets
+logs
+docker-instruction.txt
+
 HELP.md
 .gradle
 build/
