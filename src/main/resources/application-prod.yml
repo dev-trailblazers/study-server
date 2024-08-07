@@ -18,4 +18,4 @@ spring:
       port: ${REDIS_PORT}
 
 client:
-  url: ${CLIENT_API_URL}
+  url: ${CLIENT_URL}
