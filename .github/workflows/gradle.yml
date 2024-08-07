@@ -37,17 +37,3 @@ jobs:
       if: always()
       with:
         report_paths: 'build/test-results/test/TEST-*.xml'    # 해당 경로의 xml을 기준으로 댓글 작성
-
-    - name: 🐳 Send Discord Notification
-      if: env.TEST_FAILED == 'true'
-      run: |
-        curl -X POST \
-        -H "Content-Type: application/json" \
-        -d '{
-          "content": "🚨 **Test failed in GitHub Actions!** 🚨\n\n
-          Repository: '${{ github.repository }}'\n
-          Branch: '${{ github.head_ref }}'\n
-          Commit: '${{ github.sha }}'\n
-          Workflow: '${{ github.workflow }}'\n"
-        }' \
-        ${{ secrets.DISCORD_WEBHOOK_URL }}
