@@ -2,8 +2,6 @@ server:
   port: 56789
 
 spring:
-  config:
-    import: file:./secrets/.env[.properties]  # .env 파일을 .properties로 읽어온다.
   security:
     oauth2:
       client:
