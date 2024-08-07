@@ -19,6 +19,9 @@ jobs:
         java-version: '17'
         distribution: 'temurin'        # 기업에서 사용하는 테스트와 검증이 된 JDK
 
+    - name: Gradle version 확인
+      run: ./gradlew --version
+
     - name: 🐳 gradlew 실행 권한 설정
       run: chmod +x gradlew
  
