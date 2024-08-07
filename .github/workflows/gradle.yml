@@ -13,6 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - name: 🐳 서브모듈 추가
+      with:
+        token: ${{ secrets.GIT_TOKEN }}
+        submodules: true
+    - uses: actions/checkout@v3
     - name: 🐳 set JDK 17
       uses: actions/setup-java@v3
       with:
