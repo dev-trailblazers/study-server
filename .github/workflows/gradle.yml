@@ -1,0 +1,53 @@
+name: Java CI with Gradle
+
+on:
+  pull_request:           # PR에 대해서만 실행됨
+    branches: [ "main" ] 
+
+permissions:
+  checks: write           # 테스트 결과를 쓰기 위한 권한
+  pull-requests: write    # PR에 댓글을 달 수 있는 권한
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: 🐳 set JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'        # 기업에서 사용하는 테스트와 검증이 된 JDK
+
+    - name: 🐳 gradlew 실행 권한 설정
+      run: chmod +x gradlew
+ 
+    - name: 🐳 Gradle Build & Test
+      id: test
+      run: ./gradlew --info test || echo "TEST_FAILED=true" >> $GITHUB_ENV
+      
+    - name: 🐳 Test Result Report
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()      # 테스트가 실패하여도 Report를 보기 위해 `always`로 설정
+      with:
+         files: 'build/test-results/**/*.xml'
+    
+    - name: 🐳 Test Fail Comment
+      uses: mikepenz/action-junit-report@v3
+      if: always()
+      with:
+        report_paths: 'build/test-results/test/TEST-*.xml'    # 해당 경로의 xml을 기준으로 댓글 작성
+
+    - name: 🐳 Send Discord Notification
+      if: env.TEST_FAILED == 'true'
+      run: |
+        curl -X POST \
+        -H "Content-Type: application/json" \
+        -d '{
+          "content": "🚨 **Test failed in GitHub Actions!** 🚨\n\n
+          Repository: '${{ github.repository }}'\n
+          Branch: '${{ github.head_ref }}'\n
+          Commit: '${{ github.sha }}'\n
+          Workflow: '${{ github.workflow }}'\n"
+        }' \
+        ${{ secrets.DISCORD_WEBHOOK_URL }}
