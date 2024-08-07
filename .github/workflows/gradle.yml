@@ -22,7 +22,7 @@ jobs:
     - name: 🐳 gradlew 실행 권한 설정
       run: chmod +x gradlew
  
-    - name: 🐳 Gradle Build & Test
+    - name: 🐳 Gradle Test  # CI에서 Build는 불필요하게 시간이 소요되어 CD에서 진행
       id: test
       run: ./gradlew --info test || echo "TEST_FAILED=true" >> $GITHUB_ENV
       
