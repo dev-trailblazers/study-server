@@ -85,8 +85,7 @@ pipeline {
                     link: env.BUILD_URL,
                     result: currentBuild.currentResult,
                     title: "${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                    webhookURL: "${DISCORD_WEBHOOK_URL}",
-                    color: currentBuild.currentResult == 'SUCCESS' ? 'GOOD' : 'DANGER'
+                    webhookURL: "${DISCORD_WEBHOOK_URL}"
                 )
             }
 
