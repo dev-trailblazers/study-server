@@ -176,8 +176,8 @@ public class SecurityConfig {
             }
 
             Member member = oAuth2Response.toMember();
-            MemberDto.JoinDto joinDto = MemberDto.JoinDto.fromEntity(member);
             member.setPassword(UUID.randomUUID().toString());
+            MemberDto.JoinDto joinDto = MemberDto.JoinDto.fromEntity(member);
 
             //로그아웃 시 OAuth2에서도 로그아웃 할 것이기 때문에 OAuth2AccessToken을 저장한다.
             OAuth2AccessToken accessToken = userRequest.getAccessToken();
