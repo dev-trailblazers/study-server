@@ -75,8 +75,6 @@ pipeline {
     post {
         always {
             script {
-                // 작업 공간 정리
-                cleanWs()
                 // Discord로 빌드 결과 전송
                 withCredentials([string(credentialsId: DISCORD_CREDENTIALS_ID, variable: 'DISCORD_WEBHOOK_URL')]) {
                     discordSend(
