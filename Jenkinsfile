@@ -43,6 +43,8 @@ pipeline {
         stage('Docker Build') {
             steps {
                 script {
+                    sh "ls -al"
+                    sh "ls -al build/libs"
                     sh "docker build --platform linux/amd64 -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} ."
                 }
             }
@@ -74,9 +76,6 @@ pipeline {
     }
     post {
         always {
-            // 작업공간 정리
-            cleanWs()
-
             script {
                 // GitHub API를 사용하여 커밋 메시지 추출
                 def commitMessage = sh(script: "git log -1 --pretty=format:'%h %s'", returnStdout: true).trim()
