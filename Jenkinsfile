@@ -1,10 +1,9 @@
 pipeline {
     agent any
 
-    // 전체 파이프라인에 영향을 미치는 옵션
     options {
-        timeout(time: 1, unit: 'HOURS') // 각 빌드 실행 시간을 1시간으로 제한
-        skipStagesAfterUnstable()      // 이전 단계가 불안정할 경우 이후 단계를 건너뜀
+        timeout(time: 1, unit: 'HOURS')
+        skipStagesAfterUnstable()
     }
 
     environment {
@@ -25,7 +24,7 @@ pipeline {
             steps {
                 checkout([
                     $class: 'GitSCM',
-                    branches: [[name: '*/main']], // 필요한 브랜치 이름으로 변경
+                    branches: [[name: '*/main']],
                     extensions: [[$class: 'SubmoduleOption', recursiveSubmodules: true, trackingSubmodules: true]],
                     userRemoteConfigs: [[
                         url: 'https://github.com/dev-trailblazers/secrets.git',
@@ -37,7 +36,9 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    sh './gradlew clean build -x test'  //CI에서 테스트를 진행했기 때문에 CD에서는 테스트를 제외
+                    sh 'chmod +x ./gradlew'
+                    // CI에서 테스트를 진행했기 때문에 테스트나 기타 작업을 제외하고 Jar만 생성
+                    sh './gradlew clean bootJar'
                 }
             }
         }
