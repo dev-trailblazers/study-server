@@ -17,7 +17,7 @@ pipeline {
         DOCKER_CREDENTIALS_ID = 'dockerhub'
         SSH_CREDENTIALS_ID = 'raspberry-pi-ssh'
         GIT_CREDENTIALS_ID = 'github_access_token' 
-        DISCORD_CREDENTIALS_ID = 'discord_webhook'
+        DISCORD_CREDENTIALS_ID = 'discord-webhook'
     }
 
     stages {
