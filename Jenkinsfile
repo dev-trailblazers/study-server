@@ -20,17 +20,16 @@ pipeline {
     }
 
     stages {
-        stage('Checkout Code') {
+        stage('Git Clone & submodule init') {
             steps {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: '*/main']],
-                    extensions: [[$class: 'SubmoduleOption', recursiveSubmodules: true, trackingSubmodules: true]],
+                checkout scmGit(
+                    branches: [[name: 'main']],
+                    extensions: [submodule(parentCredentials: true, trackingSubmodules: true)],
                     userRemoteConfigs: [[
-                        url: 'https://github.com/dev-trailblazers/study-server.git',
+                        url: 'https://github.com/dev-trailblazers/study-server',
                         credentialsId: "${GIT_CREDENTIALS_ID}"
                     ]]
-                ])
+                )
             }
         }
         stage('Build') {
