@@ -27,7 +27,7 @@ pipeline {
                     branches: [[name: '*/main']],
                     extensions: [[$class: 'SubmoduleOption', recursiveSubmodules: true, trackingSubmodules: true]],
                     userRemoteConfigs: [[
-                        url: 'https://github.com/dev-trailblazers/secrets.git',
+                        url: 'https://github.com/dev-trailblazers/study-server.git',
                         credentialsId: "${GIT_CREDENTIALS_ID}"
                     ]]
                 ])
@@ -36,9 +36,6 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    sh 'pwd'
-                    sh 'ls -al'
-                    sh 'chmod +x ./gradlew'
                     // CI에서 테스트를 진행했기 때문에 테스트나 기타 작업을 제외하고 Jar만 생성
                     sh './gradlew clean bootJar'
                 }
