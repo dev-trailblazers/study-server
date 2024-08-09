@@ -24,12 +24,20 @@ pipeline {
             steps {
                 checkout scmGit(
                     branches: [[name: 'main']],
-                    extensions: [submodule(parentCredentials: true, trackingSubmodules: true)],
+                    extensions: [
+                        submodule(
+                            parentCredentials: true,
+                            recursiveSubmodules: true,
+                            trackingSubmodules: true
+                        )
+                    ],
                     userRemoteConfigs: [[
                         url: 'https://github.com/dev-trailblazers/study-server',
                         credentialsId: "${GIT_CREDENTIALS_ID}"
                     ]]
                 )
+                // 수동으로 서브모듈 업데이트
+                sh 'git submodule update --init --recursive --remote'
             }
         }
         stage('Build') {
