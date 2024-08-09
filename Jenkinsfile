@@ -82,12 +82,7 @@ pipeline {
     }
     post {
         always {
-            // 작업공간 정리
-            cleanWs()
-
             script {
-                // GitHub API를 사용하여 커밋 메시지 추출
-                def commitMessage = sh(script: "git log -1 --pretty=format:'%h %s'", returnStdout: true).trim()
                 // Discord로 빌드 결과 전송
                 withCredentials([string(credentialsId: DISCORD_CREDENTIALS_ID, variable: 'DISCORD_WEBHOOK_URL')]) {
                     discordSend(
@@ -97,9 +92,6 @@ pipeline {
                             **프로젝트**: ${env.JOB_NAME}
                             **시작 시간**: ${currentBuild.startTimeInMillis ? new Date(currentBuild.startTimeInMillis).format('yyyy-MM-dd HH:mm:ss') : '알 수 없음'}
                             **종료 시간**: ${currentBuild.endTimeInMillis ? new Date(currentBuild.endTimeInMillis).format('yyyy-MM-dd HH:mm:ss') : '알 수 없음'}
-
-                            **Changes:**
-                            ${commitMessage}
                         """,
                         link: env.BUILD_URL,
                         result: currentBuild.currentResult,
