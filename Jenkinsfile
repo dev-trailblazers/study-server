@@ -23,21 +23,19 @@ pipeline {
         stage('Git Clone & submodule init') {
             steps {
                 checkout scmGit(
-                    branches: [[name: 'main']],
+                    branches: [[name: '*/main']],
                     extensions: [
                         submodule(
                             parentCredentials: true,
                             recursiveSubmodules: true,
+                            reference: '',
                             trackingSubmodules: true
-                        )
-                    ],
-                    userRemoteConfigs: [[
-                        url: 'https://github.com/dev-trailblazers/study-server',
-                        credentialsId: "${GIT_CREDENTIALS_ID}"
-                    ]]
+                        )],
+                    userRemoteConfigs: [
+                        [credentialsId: 'jenkins',
+                        url: 'https:/https://github.com/dev-trailblazers/study-server.git']
+                    ]
                 )
-                // 수동으로 서브모듈 업데이트
-                sh 'git submodule update --init --recursive --remote'
             }
         }
         stage('Build') {
