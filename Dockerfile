@@ -5,7 +5,7 @@ FROM arm64v8/openjdk:17-ea-jdk-slim
 VOLUME /data
 
 # JAR 파일 복사
-COPY build/libs/study-server.jar study-service.jar
+COPY build/libs/study-service.jar study-service.jar
 # 환경 변수 파일을 yml에 선언된 경로와 같은 경로에 복사
 COPY secrets/.env /secrets/.env
 

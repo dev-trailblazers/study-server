@@ -15,7 +15,6 @@ pipeline {
 
         DOCKER_CREDENTIALS_ID = 'dockerhub'
         SSH_CREDENTIALS_ID = 'raspberry-pi-ssh'
-        GIT_CREDENTIALS_ID = 'github_access_token' 
         DISCORD_CREDENTIALS_ID = 'discord-webhook'
     }
 
@@ -27,7 +26,7 @@ pipeline {
                     extensions: [submodule(parentCredentials: true, reference: '', recursiveSubmodules: true, trackingSubmodules: true)],
                     userRemoteConfigs: [[
                         url: 'https://github.com/dev-trailblazers/study-server.git',
-                        credentialsId: ${GIT_CREDENTIALS_ID}
+                        credentialsId: 'github_access_token'
                     ]]
                 )
             }
