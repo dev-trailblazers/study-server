@@ -23,18 +23,12 @@ pipeline {
         stage('Git Clone & submodule init') {
             steps {
                 checkout scmGit(
-                    branches: [[name: '*/main']],
-                    extensions: [
-                        submodule(
-                            parentCredentials: true,
-                            recursiveSubmodules: true,
-                            reference: '',
-                            trackingSubmodules: true
-                        )],
-                    userRemoteConfigs: [
-                        [credentialsId: '${GIT_CREDENTIALS_ID}',
-                        url: 'https:/https://github.com/dev-trailblazers/study-server.git']
-                    ]
+                    branches: [[name: 'main']],
+                    extensions: [submodule(parentCredentials: true, reference: '', recursiveSubmodules: true, trackingSubmodules: true)],
+                    userRemoteConfigs: [[
+                        url: 'https://github.com/dev-trailblazers/study-server.git',
+                        credentialsId: ${GIT_CREDENTIALS_ID}
+                    ]]
                 )
             }
         }
