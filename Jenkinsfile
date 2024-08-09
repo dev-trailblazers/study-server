@@ -32,7 +32,7 @@ pipeline {
                             trackingSubmodules: true
                         )],
                     userRemoteConfigs: [
-                        [credentialsId: 'jenkins',
+                        [credentialsId: '${GIT_CREDENTIALS_ID}',
                         url: 'https:/https://github.com/dev-trailblazers/study-server.git']
                     ]
                 )
