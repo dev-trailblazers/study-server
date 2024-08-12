@@ -1,94 +1,134 @@
 pipeline {
     agent any
 
-    // 전체 파이프라인에 영향을 미치는 옵션
     options {
-        timeout(time: 1, unit: 'HOURS') // 각 빌드 실행 시간을 1시간으로 제한
-        skipStagesAfterUnstable()      // 이전 단계가 불안정할 경우 이후 단계를 건너뜀
+        timeout(time: 1, unit: 'HOURS')
+        skipStagesAfterUnstable()
     }
 
     environment {
-        IMAGE_NAME = 'study-service'
+        IMAGE_NAME = 'monolithic/study-service'
         IMAGE_TAG = 'latest'
-        DOCKER_REGISTRY = 'docker-registry'
-        DEPLOY_SERVER_IP = 'raspberry-pi-ip'
-        DEPLOY_SERVER_USER = 'pi'
-
-        DOCKER_CREDENTIALS_ID = 'dockerhub'
-        SSH_CREDENTIALS_ID = 'raspberry-pi-ssh'
-        GIT_CREDENTIALS_ID = 'github_access_token' 
-        DISCORD_CREDENTIALS_ID = 'discord_webhook'
+        CONTAINER_NAME = 'study-service'
+        DEPLOY_USER = 'pi'
+        DEPLOY_IP = credentials('raspberry-pi-ip')
+        SSH_PORT = credentials('raspberry-pi-port')
+        DOCKER_REGISTRY_URL = credentials('docker-registry-url')
+        MY_EMAIL = credentials('my-email')
     }
 
     stages {
-        stage('Checkout Code') {
+        stage('Git Clone & Submodule Init') {
             steps {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: '*/main']], // 필요한 브랜치 이름으로 변경
-                    extensions: [[$class: 'SubmoduleOption', recursiveSubmodules: true, trackingSubmodules: true]],
+                checkout scmGit(
+                    branches: [[name: 'main']],
+                    extensions: [submodule(parentCredentials: true, reference: '', recursiveSubmodules: true, trackingSubmodules: true)],
                     userRemoteConfigs: [[
-                        url: 'https://github.com/dev-trailblazers/secrets.git',
-                        credentialsId: "${GIT_CREDENTIALS_ID}"
+                        url: 'https://github.com/dev-trailblazers/study-server.git',
+                        credentialsId: 'github_access_token'
                     ]]
-                ])
+                )
             }
         }
-        stage('Build') {
+        stage('Gradle Build') {
             steps {
                 script {
-                    sh './gradlew clean build -x test'  //CI에서 테스트를 진행했기 때문에 CD에서는 테스트를 제외
+                    // CI에서 테스트를 진행했기 때문에 테스트나 기타 작업을 제외하고 Jar만 생성
+                    sh './gradlew clean bootJar'
                 }
             }
         }
         stage('Docker Build') {
             steps {
                 script {
-                    sh "docker build --platform linux/amd64 -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                    sh "docker build --platform linux/amd64 -t $DOCKER_REGISTRY_URL/$IMAGE_NAME:$IMAGE_TAG ."
                 }
             }
         }
         stage('Docker Push') {
             steps {
                 script {
-                    docker.withRegistry("https://${DOCKER_REGISTRY}", DOCKER_CREDENTIALS_ID) {
-                        sh "docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
+                    withCredentials([usernamePassword(credentialsId: 'docker-registry', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                        sh '''
+                            echo $DOCKER_PASSWORD | docker login $DOCKER_REGISTRY_URL --username $DOCKER_USERNAME --password-stdin
+                            docker push $DOCKER_REGISTRY_URL/$IMAGE_NAME:$IMAGE_TAG
+                        '''
                     }
                 }
             }
         }
-        stage('Deploy') {
+        stage('Container Deploy') {
             steps {
-                script {
-                    sshagent([SSH_CREDENTIALS_ID]) {
+                sshagent(credentials: ['jenkins-ssh']) {
+                    withCredentials([usernamePassword(credentialsId: 'docker-registry', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                        /*
+                            sh에서 '''로 멀티 라인 명령을 실행하면 sh 문법을 사용해서 $변수명으로 변수를 바인딩한다.
+                            """를 사용하면 groovy 문법을 사용해서 ${변수명}으로 변수를 바인딩한다.
+                            sh에서 ssh로 해당 환경에 접속해서 아래 명령을 실행할 때 '''를 사용하면 ssh 서버에 있는 변수를 찾기 때문에 """를 사용한다.
+                        */
                         sh """
-                        ssh -p 22123 ${DEPLOY_SERVER_USER}@${DEPLOY_SERVER_IP} 'docker stop ${IMAGE_NAME} || true'
-                        ssh -p 22123 ${DEPLOY_SERVER_USER}@${DEPLOY_SERVER_IP} 'docker rm ${IMAGE_NAME} || true'
-                        ssh -p 22123 ${DEPLOY_SERVER_USER}@${DEPLOY_SERVER_IP} 'docker rmi ${DOCKER_REGISTRY}/${IMAGE_NAME} || true'
-                        ssh -p 22123 ${DEPLOY_SERVER_USER}@${DEPLOY_SERVER_IP} 'docker pull ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}'
-                        ssh -p 22123 ${DEPLOY_SERVER_USER}@${DEPLOY_SERVER_IP} 'docker run -d -p 56789:56789 --name ${IMAGE_NAME} ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}'
+                            ssh -p ${SSH_PORT} -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_IP} '
+                                echo ${DOCKER_PASSWORD} | sudo docker login ${DOCKER_REGISTRY_URL} --username ${DOCKER_USERNAME} --password-stdin
+                                sudo docker stop ${CONTAINER_NAME} || true
+                                sudo docker rm ${CONTAINER_NAME} || true
+                                sudo docker pull ${DOCKER_REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}
+                                sudo docker run -d -p 56789:56789 --restart always --name ${CONTAINER_NAME} ${DOCKER_REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}
+                            '
                         """
                     }
                 }
             }
         }
     }
+
     post {
-        always {
-            // 작업공간 정리
-            cleanWs() 
-            //Discord로 빌드 결과 전송
-            withCredentials([string(credentialsId: DISCORD_CREDENTIALS_ID, variable: 'DISCORD_WEBHOOK_URL')]) {
-                discordSend(
-                    description: "Jenkins Build Notification",
-                    footer: "Jenkins Pipeline",
-                    link: env.BUILD_URL,
-                    result: currentBuild.currentResult,
-                    title: "${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                    webhookURL: "${DISCORD_WEBHOOK_URL}"
+        success {
+            script {
+                withCredentials([string(credentialsId: 'discord-webhook', variable: 'DISCORD_WEBHOOK_URL')]) {
+                    def startTime = currentBuild.startTimeInMillis ? new Date(currentBuild.startTimeInMillis).format('yyyy-MM-dd HH:mm:ss') : '알 수 없음'
+                    def endTime = currentBuild.getTimeInMillis() ? new Date(currentBuild.getTimeInMillis()).format('yyyy-MM-dd HH:mm:ss') : '알 수 없음'
+
+                    discordSend(
+                        description: """
+                            **Study Service Monolithic CICD #${env.BUILD_NUMBER}**
+                            **Status**: ${currentBuild.currentResult}
+                            **프로젝트**: ${env.JOB_NAME}
+                            **시작 시간**: ${startTime}
+                            **종료 시간**: ${endTime}
+                        """,
+                        link: env.BUILD_URL,
+                        result: 'SUCCESS',
+                        title: "${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                        webhookURL: "${DISCORD_WEBHOOK_URL}"
+                    )
+                }
+            }
+        }
+        failure {
+            script {
+                def startTime = currentBuild.startTimeInMillis ? new Date(currentBuild.startTimeInMillis).format('yyyy-MM-dd HH:mm:ss') : '알 수 없음'
+                def endTime = currentBuild.getTimeInMillis() ? new Date(currentBuild.getTimeInMillis()).format('yyyy-MM-dd HH:mm:ss') : '알 수 없음'
+                def recipient = "${MY_EMAIL}"
+                def subject = "Jenkins Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+                def body = """
+                <h2>Jenkins Deployment Failed</h2>
+                <ul>
+                    <li><strong>Job Name:</strong> ${env.JOB_NAME}</li>
+                    <li><strong>Build Number:</strong> ${env.BUILD_NUMBER}</li>
+                    <li><strong>Status:</strong> ${currentBuild.currentResult}</li>
+                    <li><strong>Start Time:</strong> ${startTime}</li>
+                    <li><strong>End Time:</strong> ${endTime}</li>
+                    <li><strong>Build URL:</strong> <a href="${env.BUILD_URL}">${env.BUILD_URL}</a></li>
+                </ul>
+                <p>Please check the Jenkins console output for more details.</p>
+                """
+                emailext(
+                    to: recipient,
+                    subject: subject,
+                    body: body,
+                    mimeType: 'text/html'
                 )
             }
-
         }
     }
 }
